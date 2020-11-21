@@ -29,6 +29,7 @@ jobs:
       - run:
           name: terraform
           command: |
+            cd terraform/network
             terraform apply -auto-approve tfapply
       - persist_to_workspace:
           root: .
@@ -44,6 +45,7 @@ jobs:
       - run:
           name: terraform create destroy plan
           command: |
+            cd terraform/network
             terraform plan -destroy -out tfdestroy -var-file environment.tfvars
       - persist_to_workspace:
           root: .
@@ -59,6 +61,7 @@ jobs:
       - run:
           name: terraform destroy
           command: |
+            cd terraform/network
             terraform apply -auto-approve tfdestroy
 
 workflows:
