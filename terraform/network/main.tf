@@ -8,7 +8,7 @@ resource "aws_vpc" "wp-mysql-vpc" {
 }
 
 resource "aws_subnet" "wp-mysql-subnet-1" {
-  vpc_id            = aws_vpc.wordpress-mysql-vpc.id
+  vpc_id            = aws_vpc.wp-mysql-vpc.id
   cidr_block        = var.subnet_1_cidr
   availability_zone = "ap-southeast-2a"
 
