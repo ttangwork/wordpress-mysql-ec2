@@ -7,19 +7,16 @@ jobs:
       - image: hashicorp/terraform:light
     steps:
       - checkout
-      - run: 
-          name: go to network folder
+      - run:
+          name: terraform init & plan
           command: |
             cd terraform/network
             ls -la
             pwd
-      - run:
-          name: terraform init & plan
-          command: |
             terraform init -input=false
             terraform plan -out tfapply -var-file environment.tfvars
       - persist_to_workspace:
-          root: .
+          root: ./terraform/network
           paths:
             - .
 
@@ -34,7 +31,7 @@ jobs:
           command: |
             terraform apply -auto-approve tfapply
       - persist_to_workspace:
-          root: .
+          root: ./terraform/network
           paths:
             - .
 
@@ -49,7 +46,7 @@ jobs:
           command: |
             terraform plan -destroy -out tfdestroy -var-file environment.tfvars
       - persist_to_workspace:
-          root: .
+          root: ./terraform/network
           paths:
             - .
 
