@@ -29,8 +29,9 @@ jobs:
           command: |
             cd terraform/network
             terraform apply -auto-approve tfapply
-            echo 'export VPC_ID=`terraform output vpc_id`' >> $BASH_ENV
             echo 'export PUBLIC_SUBNET_ID=`terraform output public_subnet_id`' >> $BASH_ENV
+            echo $PUBLIC_SUBNET_ID
+            echo ${PUBLIC_SUBNET_ID}
       - persist_to_workspace:
           root: .
           paths:
@@ -108,13 +109,13 @@ workflows:
       - terraform-apply:
           requires:
             - terraform-hold-apply
+      - packer-validate:
+          requires:
+            - terraform-apply
       - packer-hold:
           type: approval
           requires:
-            - terraform-apply
-      - packer-validate:
-          requires:
-            - packer-hold
+            - packer-validate
       - packer-build:
           requires:
             - packer-validate
