@@ -1,10 +1,7 @@
-version: 2
-
-orbs:
-  packer: salaxander/packer@0.0.3
+version: 2.1
 
 jobs:
-  plan-apply:
+  terraform-plan-apply:
     working_directory: /tmp/project
     docker:
       - image: hashicorp/terraform:light
@@ -21,14 +18,14 @@ jobs:
           paths:
             - .
 
-  apply:
+  terraform-apply:
     docker:
       - image: hashicorp/terraform:light
     steps:
       - attach_workspace:
           at: .
       - run:
-          name: terraform
+          name: terraform-apply
           command: |
             cd terraform/network
             terraform apply -auto-approve tfapply
@@ -39,19 +36,39 @@ jobs:
           paths:
             - .
 
-  packer-build:
-    executor: packer/default
+  packer-validate:
+    docker:
+      - image: hashicorp/packer:light
     steps:
-      - checkout
-      - build:
-          template: /packer/packer.json
-          args: |
-            -var aws_region=ap-southeast-2
-            -var vpc_id=${VPC_ID}
-            -var subnet_id=${PUBLIC_SUBNET_ID}
-            -var branch=${CIRCLE_BRANCH}
+      - attach_workspace:
+          at: .
+      - run:
+          name: packer-validate
+          command: |
+            cd packer
+            packer validate packer.json
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
 
-  plan-destroy:
+  packer-build:
+    docker:
+      - image: hashicorp/packer:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: packer-build
+          command: |
+            cd packer
+            packer build -var subnet_id=${PUBLIC_SUBNET_ID} packer.json
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  terraform-plan-destroy:
     docker:
       - image: hashicorp/terraform:light
     steps:
@@ -67,7 +84,7 @@ jobs:
           paths:
             - .
 
-  destroy:
+  terraform-destroy:
     docker:
       - image: hashicorp/terraform:light
     steps:
@@ -83,28 +100,31 @@ workflows:
   version: 2
   plan_approve_apply:
     jobs:
-      - plan-apply
-      - hold-apply:
+      - terraform-plan-apply
+      - terraform-hold-apply:
           type: approval
           requires:
-            - plan-apply
-      - apply:
+            - terraform-plan-apply
+      - terraform-apply:
           requires:
-            - hold-apply
-      - hold-packer:
+            - terraform-hold-apply
+      - packer-hold:
           type: approval
           requires:
-            - apply
+            - terraform-apply
+      - packer-validate:
+          requires:
+            - packer-hold
       - packer-build:
           requires:
-            - hold-packer
-      - plan-destroy:
+            - packer-validate
+      - terraform-plan-destroy:
           requires:
             - packer-build
-      - hold-destroy:
+      - terraform-hold-destroy:
           type: approval
           requires:
-            - plan-destroy
-      - destroy:
+            - terraform-plan-destroy
+      - terraform-destroy:
           requires:
-            - hold-destroy
+            - terraform-hold-destroy
