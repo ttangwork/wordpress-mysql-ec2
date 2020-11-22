@@ -1,5 +1,8 @@
 version: 2
 
+orbs:
+  packer: salaxander/packer@0.1
+
 jobs:
   plan-apply:
     working_directory: /tmp/project
@@ -11,8 +14,6 @@ jobs:
           name: terraform init & plan
           command: |
             cd terraform/network
-            ls -la
-            pwd
             terraform init -input=false
             terraform plan -out tfapply -var-file environment.tfvars
       - persist_to_workspace:
@@ -31,10 +32,24 @@ jobs:
           command: |
             cd terraform/network
             terraform apply -auto-approve tfapply
+            echo 'export VPC_ID=`terraform output vpc_id`' >> $BASH_ENV
+            echo 'export PUBLIC_SUBNET_ID=`terraform output public_subnet_id`' >> $BASH_ENV
       - persist_to_workspace:
           root: .
           paths:
             - .
+
+  packer:
+    executor: packer/default
+    steps:
+      - checkout
+      - build:
+          template: /packer/packer.json
+          args: |
+            -var aws_region=ap-southeast-2
+            -var vpc_id=${VPC_ID}
+            -var subnet_id=${PUBLIC_SUBNET_ID}
+            -var branch=${CIRCLE_BRANCH}
 
   plan-destroy:
     docker:
@@ -76,9 +91,16 @@ workflows:
       - apply:
           requires:
             - hold-apply
-      - plan-destroy:
+      - hold-packer:
+          type: approval
           requires:
             - apply
+      - packer:
+          requires:
+            - hold-packer
+      - plan-destroy:
+          requires:
+            - packer
       - hold-destroy:
           type: approval
           requires:
