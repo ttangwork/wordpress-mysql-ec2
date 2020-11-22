@@ -32,8 +32,7 @@ jobs:
           command: |
             cd terraform/network
             terraform apply -auto-approve tfapply
-            subnet_id=`terraform output public_subnet_ids|grep subnet|head -1|sed -e 's/"//' -e 's/",//'`
-            echo $subnet_id >> ../../packer/subnet_id.txt
+            terraform output public_subnet_id_for_packer >> ../../packer/subnet_id.txt
       - persist_to_workspace:
           root: .
           paths:
@@ -216,6 +215,6 @@ workflows:
           type: approval
           requires:
             - terraform-network-plan-destroy
-      - terraform-destroy:
+      - terraform-network-destroy:
           requires:
             - terraform-network-hold-destroy
