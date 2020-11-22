@@ -216,6 +216,6 @@ workflows:
           type: approval
           requires:
             - terraform-network-plan-destroy
-      - terraform-network-destroy:
+      - terraform-destroy:
           requires:
             - terraform-network-hold-destroy
