@@ -29,9 +29,7 @@ jobs:
           command: |
             cd terraform/network
             terraform apply -auto-approve tfapply
-            echo 'export PUBLIC_SUBNET_ID=`terraform output public_subnet_id`' >> $BASH_ENV
-            echo $PUBLIC_SUBNET_ID
-            echo ${PUBLIC_SUBNET_ID}
+            terraform output public_subnet_id >> ../../packer/subnet_id.txt
       - persist_to_workspace:
           root: .
           paths:
@@ -63,7 +61,8 @@ jobs:
           name: packer-build
           command: |
             cd packer
-            packer build -var subnet_id=${PUBLIC_SUBNET_ID} packer.json
+            subnet_id=`cat subnet_id.txt`
+            packer build -var subnet_id=$subnet_id packer.json
       - persist_to_workspace:
           root: .
           paths:
@@ -118,7 +117,7 @@ workflows:
             - packer-validate
       - packer-build:
           requires:
-            - packer-validate
+            - packer-hold
       - terraform-plan-destroy:
           requires:
             - packer-build
