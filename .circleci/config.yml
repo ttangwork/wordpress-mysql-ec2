@@ -1,7 +1,7 @@
 version: 2
 
 orbs:
-  packer: salaxander/packer@0.1
+  packer: salaxander/packer@0.0.3
 
 jobs:
   plan-apply:
@@ -39,7 +39,7 @@ jobs:
           paths:
             - .
 
-  packer:
+  packer-build:
     executor: packer/default
     steps:
       - checkout
@@ -95,12 +95,12 @@ workflows:
           type: approval
           requires:
             - apply
-      - packer:
+      - packer-build:
           requires:
             - hold-packer
       - plan-destroy:
           requires:
-            - packer
+            - packer-build
       - hold-destroy:
           type: approval
           requires:
