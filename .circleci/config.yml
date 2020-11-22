@@ -32,10 +32,8 @@ jobs:
           command: |
             cd terraform/network
             terraform apply -auto-approve tfapply
-            which grep
-            which head
-            which sed
-            terraform output public_subnet_ids|grep subnet|head -1|sed -e 's/"//' -e 's/",//' >> ../../packer/subnet_id.txt
+            subnet_id=`terraform output public_subnet_ids|grep subnet|head -1|sed -e 's/"//' -e 's/",//'`
+            echo $subnet_id >> ../../packer/subnet_id.txt
       - persist_to_workspace:
           root: .
           paths:
