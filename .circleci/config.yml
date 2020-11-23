@@ -131,6 +131,70 @@ jobs:
             terraform apply -auto-approve tfdestroy
 
 ####################################
+# RDS
+####################################
+  terraform-rds-plan-apply:
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: terraform init & plan
+          command: |
+            cd terraform/rds
+            terraform init -input=false
+            terraform plan -out tfapply -var-file environment.tfvars
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  terraform-rds-apply:
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: terraform-apply
+          command: |
+            cd terraform/rds
+            terraform apply -auto-approve tfapply
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  terraform-rds-plan-destroy:
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: terraform create destroy plan
+          command: |
+            cd terraform/rds
+            terraform plan -destroy -out tfdestroy -var-file environment.tfvars
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  terraform-rds-destroy:
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: terraform destroy
+          command: |
+            cd terraform/rds
+            terraform apply -auto-approve tfdestroy
+
+####################################
 # Packer
 ####################################
   packer-validate:
@@ -198,9 +262,29 @@ workflows:
       - terraform-ec2-apply:
           requires:
             - terraform-ec2-hold-apply
-      - terraform-ec2-plan-destroy:
+      - terraform-rds-plan-apply:
           requires:
             - terraform-ec2-apply
+      - terraform-rds-hold-apply:
+          type: approval
+          requires:
+            - terraform-rds-plan-apply
+      - terraform-rds-apply:
+          requires:
+            - terraform-rds-hold-apply
+      - terraform-rds-plan-destroy:
+          requires:
+            - terraform-rds-apply
+      - terraform-rds-hold-destroy:
+          type: approval  
+          requires:
+            - terraform-rds-plan-destroy
+      - terraform-rds-destroy:
+          requires:
+            - terraform-rds-hold-destroy
+      - terraform-ec2-plan-destroy:
+          requires:
+            - terraform-rds-destroy
       - terraform-ec2-hold-destroy:
           type: approval  
           requires:
