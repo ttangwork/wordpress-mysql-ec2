@@ -1,10 +1,61 @@
+# security groups
+resource "aws_security_group" "alb_sg" {
+  name        = format("%s-alb_sg", var.app_prefix)
+  description = "Allow inbound HTTP traffic"
+  vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
+
+  ingress {
+    description = "HTTP inbound"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [aws_vpc.main.cidr_block]
+  }
+
+  tags = {
+    Name = format("%s-alb-sg", var.app_prefix)
+  }
+}
+
+resource "aws_security_group" "asg_sg" {
+  name        = format("%s-asg_sg", var.app_prefix)
+  description = "Allow inbound HTTP traffic"
+  vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
+
+  ingress {
+    description = "Inbound HTTP from ALB"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = [aws_security_group.alb_sg.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [aws_vpc.main.cidr_block]
+  }
+
+  tags = {
+    Name = format("%s-asg-sg", var.app_prefix)
+  }
+}
+
 # application load balancer
 resource "aws_lb" "lb" {
   name               = format("%s-lb", var.app_prefix)
   internal           = false
   load_balancer_type = "application"
-  #   security_groups    = [aws_security_group.lb_sg.id]
-  subnets = data.terraform_remote_state.vpc.outputs.public_subnet_ids
+  security_groups    = [aws_security_group.alb_sg.id]
+  subnets            = data.terraform_remote_state.vpc.outputs.public_subnet_ids
 
   tags = {
     Name = format("%s-lb", var.app_prefix)
@@ -31,9 +82,10 @@ resource "aws_lb_listener" "lb_listener" {
 
 # launch configuration
 resource "aws_launch_configuration" "lc" {
-  name          = format("%s-lc", var.app_prefix)
-  image_id      = data.aws_ami.ami.id
-  instance_type = "t3.micro"
+  name            = format("%s-lc", var.app_prefix)
+  image_id        = data.aws_ami.ami.id
+  instance_type   = "t3.micro"
+  security_groups = [aws_security_group.asg_sg.id]
 }
 
 # auto scaling group
