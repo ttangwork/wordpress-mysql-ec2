@@ -1,6 +1,14 @@
+resource "aws_db_subnet_group" "rds_subnet_group" {
+  name       = format("%s-rds-subnet-group", var.app_prefix)
+  subnet_ids = [data.terraform_remote_state.vpc.outputs.private_subnet_ids]
+
+  tags = {
+    Name = format("%s-rds-subnet-group", var.app_prefix)
+  }
+}
 resource "aws_db_instance" "rds_mysql" {
   identifier           = format("%s-rds-mysql", var.app_prefix)
-  db_subnet_group_name = data.terraform_remote_state.vpc.outputs.private_subnet_id_for_rds
+  db_subnet_group_name = aws_db_subnet_group.rds_subnet_group.id
   allocated_storage    = 20
   storage_type         = "gp2"
   engine               = "mysql"

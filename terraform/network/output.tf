@@ -19,7 +19,3 @@ output "public_subnet_ids" {
 output "public_subnet_id_for_packer" {
   value = length(aws_subnet.public_subnets.*.id) == 0 ? "" : aws_subnet.public_subnets[0].id
 }
-
-output "private_subnet_id_for_rds" {
-  value = length(aws_subnet.private_subnets.*.id) == 0 ? "" : aws_subnet.private_subnets[0].id
-}
