@@ -20,3 +20,11 @@ Through CircleCI pipeline, the workflow:
 ## Patching
 A scheduled job in CircleCI runs everyday at 2 AM to bake a new AMI using the latest Amazon Linux 2. Once the AMI is available, the launch configuration gets updated to use this AMI and relaunch EC2 instances.
 ## Known Issues
+
+## References
+* https://learn.hashicorp.com/tutorials/terraform/circle-ci
+* https://github.com/terraform-google-modules/terraform-google-cloud-dns/issues/8
+* https://www.packer.io/docs/templates/engine
+* https://github.com/hashicorp/packer/issues/7527
+* https://circleci.com/docs/2.0/deployment-examples/#aws
+* https://github.com/CircleCI-Public/circleci-packer
