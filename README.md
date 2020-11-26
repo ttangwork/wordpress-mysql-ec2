@@ -24,7 +24,8 @@ A scheduled job in CircleCI runs everyday at 2 AM to bake a new AMI using the la
 ## References
 * https://learn.hashicorp.com/tutorials/terraform/circle-ci
 * https://github.com/terraform-google-modules/terraform-google-cloud-dns/issues/8
-* https://www.packer.io/docs/templates/engine
+* https://www.packer.io/docs/builders/amazon-ebs.html
 * https://github.com/hashicorp/packer/issues/7527
 * https://circleci.com/docs/2.0/deployment-examples/#aws
 * https://github.com/CircleCI-Public/circleci-packer
+* https://registry.terraform.io/providers/hashicorp/aws/latest/docs

@@ -85,6 +85,7 @@ resource "aws_launch_configuration" "lc" {
   name            = format("%s-lc", var.app_prefix)
   image_id        = data.aws_ami.ami.id
   instance_type   = "t3.micro"
+  key_name = var.key_name
   security_groups = [aws_security_group.asg_sg.id]
 }
 

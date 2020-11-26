@@ -49,7 +49,11 @@
     ],
     
     "provisioners": [
-        
+      {
+        "type": "ansible-local",
+        "extra_arguments": ["--become"],
+        "playbook_file": "packer/ansible/playbook.yml"
+      }
     ],
 
     "post-processors": [

@@ -1,0 +1,15 @@
+---
+- name: Install Apache Web Server
+  hosts: localhost
+
+  tasks:
+  - name: Install Apache
+    yum:
+      name: httpd
+      state: latest
+
+    - name: Download and Unarchive Wordpress
+    unarchive:
+      src: https://wordpress.org/latest.tar.gz
+      dest: /var/www/
+      remote_src: "yes"
