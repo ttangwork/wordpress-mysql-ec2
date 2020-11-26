@@ -52,7 +52,7 @@
       {
         "type": "ansible-local",
         "extra_arguments": ["--become"],
-        "playbook_file": "packer/ansible/playbook.yml"
+        "playbook_file": "ansible/playbook.yml"
       }
     ],
 
