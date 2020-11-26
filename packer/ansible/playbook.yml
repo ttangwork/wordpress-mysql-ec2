@@ -3,6 +3,12 @@
   hosts: localhost
 
   tasks:
+  - name: Install ssm-agent
+    command: sudo yum install -y https://s3.ap-southeast-2.amazonaws.com/amazon-ssm-ap-southeast-2/latest/linux_amd64/amazon-ssm-agent.rpm
+  
+  - name: Restart amazon-ssm-agent
+    service: name=amazon-ssm-agent state=restarted
+
   - name: Install httpd
     yum:
       name: httpd
