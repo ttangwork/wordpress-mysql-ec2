@@ -50,7 +50,7 @@
     
     "provisioners": [
       {
-        "type": "ansible-local",
+        "type": "ansible",
         "extra_arguments": ["--become"],
         "playbook_file": "ansible/playbook.yml"
       }
