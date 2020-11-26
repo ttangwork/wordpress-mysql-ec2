@@ -50,6 +50,12 @@
     
     "provisioners": [
       {
+        "type": "shell",
+        "inline": [
+          "sudo amazon-linux-extras install ansible2"
+        ]
+      },
+      {
         "type": "ansible-local",
         "extra_arguments": ["--become"],
         "playbook_file": "ansible/playbook.yml"

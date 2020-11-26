@@ -1,14 +1,17 @@
 ---
-- name: Install Apache Web Server
+- name: Install and configure Wordpress
   hosts: localhost
 
   tasks:
-  - name: Install Apache
+  - name: Install httpd
     yum:
       name: httpd
       state: latest
+  
+  - name: Restart httpd
+    service: name=httpd state=restarted
 
-    - name: Download and Unarchive Wordpress
+  - name: Download and Unarchive Wordpress
     unarchive:
       src: https://wordpress.org/latest.tar.gz
       dest: /var/www/
