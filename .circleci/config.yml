@@ -142,6 +142,7 @@ jobs:
       - run:
           name: terraform init & plan
           command: |
+            sh scripts/rds_vars.sh
             cd terraform/rds
             terraform init -input=false
             terraform plan -out tfapply -var-file environment.tfvars

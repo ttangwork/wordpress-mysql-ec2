@@ -11,11 +11,22 @@
   #     name: amazon-ssm-agent
   #     state: restarted
 
+  
+  - name: Install php and mariadb
+    command: amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
+    args:
+      creates: /sbin/nginx
+
   - name: Install httpd
     yum:
       name: httpd
       state: latest
   
+  - name: Enable httpd service
+  service:
+    name: httpd
+    enabled: yes
+
   - name: Restart httpd
     service:
       name: httpd

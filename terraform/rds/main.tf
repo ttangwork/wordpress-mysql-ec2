@@ -42,8 +42,8 @@ resource "aws_db_instance" "rds_mysql" {
   engine_version         = "8.0.21"
   instance_class         = "db.t3.micro"
   name                   = "wordpress"
-  username               = "wp_db_user"
-  password               = "Pas$W0rd" # change this from AWS console
+  username               = var.db_user
+  password               = var.db_password
   tags = {
     Name = format("%s-rds-mysql", var.app_prefix)
   }
