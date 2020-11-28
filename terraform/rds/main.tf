@@ -34,7 +34,7 @@ resource "aws_security_group" "rds_sg" {
 resource "aws_db_instance" "rds_mysql" {
   identifier             = format("%s-rds-mysql", var.app_prefix)
   db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.id
-  vpc_security_group_ids = [aws_security_group.rds_sg]
+  vpc_security_group_ids = [aws_security_group.rds_sg.id]
   skip_final_snapshot    = true
   allocated_storage      = 20
   storage_type           = "gp2"
