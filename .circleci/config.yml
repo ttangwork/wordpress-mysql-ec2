@@ -16,10 +16,6 @@ jobs:
             cd terraform/network
             terraform init -input=false
             terraform plan -out tfapply -var-file environment.tfvars
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
 
   terraform-network-apply:
     docker:
@@ -33,10 +29,6 @@ jobs:
             cd terraform/network
             terraform apply -auto-approve tfapply
             terraform output public_subnet_id_for_packer >> ../../packer/subnet_id.txt
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
 
   terraform-network-plan-destroy:
     docker:
@@ -49,10 +41,6 @@ jobs:
           command: |
             cd terraform/network
             terraform plan -destroy -out tfdestroy -var-file environment.tfvars
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
 
   terraform-network-destroy:
     docker:
@@ -81,10 +69,6 @@ jobs:
             cd terraform/ec2
             terraform init -input=false
             terraform plan -out tfapply -var-file environment.tfvars
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
 
   terraform-ec2-apply:
     docker:
@@ -97,10 +81,6 @@ jobs:
           command: |
             cd terraform/ec2
             terraform apply -auto-approve tfapply
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
 
   terraform-ec2-plan-destroy:
     docker:
@@ -113,10 +93,6 @@ jobs:
           command: |
             cd terraform/ec2
             terraform plan -destroy -out tfdestroy -var-file environment.tfvars
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
 
   terraform-ec2-destroy:
     docker:
@@ -145,10 +121,6 @@ jobs:
             cd terraform/rds
             terraform init -input=false
             terraform plan -out tfapply -var-file environment.tfvars
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
 
   terraform-rds-apply:
     docker:
@@ -161,10 +133,6 @@ jobs:
           command: |
             cd terraform/rds
             terraform apply -auto-approve tfapply
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
 
   terraform-rds-plan-destroy:
     docker:
@@ -177,10 +145,6 @@ jobs:
           command: |
             cd terraform/rds
             terraform plan -destroy -out tfdestroy -var-file environment.tfvars
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
 
   terraform-rds-destroy:
     docker:
@@ -208,10 +172,6 @@ jobs:
           command: |
             cd packer
             packer validate packer.json
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
 
   packer-build:
     docker:
@@ -225,10 +185,6 @@ jobs:
             cd packer
             subnet_id=`cat subnet_id.txt`
             packer build -var subnet_id=$subnet_id packer.json
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .
 
 workflows:
   version: 2
