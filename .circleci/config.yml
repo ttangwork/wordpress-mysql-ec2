@@ -142,8 +142,7 @@ jobs:
     steps:
       - checkout
       - aws-cli/setup:
-          profile-name: default
-          aws-region: ap-southeast-2
+          profile-name: rds
       - run:
           command: sh scripts/rds_vars.sh
 
