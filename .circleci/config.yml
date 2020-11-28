@@ -144,7 +144,10 @@ jobs:
       - aws-cli/setup:
           profile-name: rds
       - run:
-          command: sh scripts/rds_vars.sh
+          command: |
+            pwd
+            ls -la
+            sh scripts/rds_vars.sh
 
   terraform-rds-plan-apply:
     docker:
