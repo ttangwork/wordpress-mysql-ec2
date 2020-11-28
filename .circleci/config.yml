@@ -304,13 +304,23 @@ workflows:
       #     requires:
       #       - terraform-network-hold-destroy
 
-      # Faster pipeline without Packer build and approvals
+      # Faster pipeline without Packer build
       - terraform-network-plan-apply
-      - terraform-network-apply
-      - terraform-ec2-plan-apply
-      - terraform-ec2-apply
-      - terraform-rds-plan-apply
-      - terraform-rds-apply
+      - terraform-network-apply:
+          requires:
+            - terraform-network-plan-apply
+      - terraform-ec2-plan-apply:
+          requires:
+            - terraform-network-apply
+      - terraform-ec2-apply:
+          requires:
+            - terraform-ec2-plan-apply
+      - terraform-rds-plan-apply:
+          requires:
+            - terraform-ec2-apply
+      - terraform-rds-apply:
+          requires:
+            - terraform-rds-plan-apply
       - terraform-rds-plan-destroy:
           requires:
             - terraform-rds-apply
