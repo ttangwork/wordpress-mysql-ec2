@@ -137,16 +137,21 @@ jobs:
 ####################################
 # RDS
 ####################################
+  shell-rds-vars:
+    executor: aws-cli/default
+    steps:
+      - checkout
+      - aws-cli/setup:
+          profile-name: rds
+      - run:
+          command: sh scripts/rds_vars.sh
+
   terraform-rds-plan-apply:
     docker:
       - image: hashicorp/terraform:light
     steps:
       - attach_workspace:
           at: .
-      - run:
-          name: run rds_vars sh
-          command: |
-            sh scripts/rds_vars.sh
       - run:
           name: terraform init & plan
           command: |
@@ -313,6 +318,8 @@ workflows:
       #       - terraform-network-hold-destroy
 
       # Faster pipeline without Packer build
+      - shell-rds-vars:
+          context: aws
       - terraform-network-plan-apply
       - terraform-network-apply:
           requires:
