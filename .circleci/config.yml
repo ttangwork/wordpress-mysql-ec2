@@ -263,8 +263,8 @@ workflows:
       #     requires:
       #       - terraform-ec2-hold-apply
       - terraform-rds-plan-apply:
-          requires:
-            - terraform-ec2-apply
+          # requires:
+          #   - terraform-ec2-apply
       - terraform-rds-hold-apply:
           type: approval
           requires:
