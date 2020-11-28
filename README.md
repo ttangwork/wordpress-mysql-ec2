@@ -3,8 +3,13 @@
 IaC for wordpress and mysql running on ec2
 
 ## Prerequesites
-Run s3-backend manually to create the backend bucket
-Update following files:
+### AWS SSM parameters
+The following SSM parameters need to be set up beforehand:
+* wp-db-user
+* wp-db-password
+You need to specify the username and password for your RDS database in these parameters.
+### Terraform S3 backend
+Run `s3-backend` manually to create the backend bucket. Once the bucket is created, update the following files:
 * terraform/network/backend.tf
 * terraform/ec2/data.tf
 * terraform/ec2/backend.tf

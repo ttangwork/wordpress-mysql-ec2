@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  shellcheck: circleci/shellcheck@0.7.1
+
 jobs:
 ####################################
 # Network
@@ -140,9 +143,13 @@ jobs:
       - attach_workspace:
           at: .
       - run:
+          name: install dependencies
+          command: |
+            sudo apt-get -y -qq install awscli
+            sh scripts/rds_vars.sh
+      - run:
           name: terraform init & plan
           command: |
-            sh scripts/rds_vars.sh
             cd terraform/rds
             terraform init -input=false
             terraform plan -out tfapply -var-file environment.tfvars
