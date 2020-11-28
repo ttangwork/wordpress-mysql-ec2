@@ -234,6 +234,7 @@ workflows:
   version: 2
   aws-wordpress-mysql:
     jobs:
+      # Complete pipeline
       # - terraform-network-plan-apply
       # - terraform-network-hold-apply:
       #     type: approval
@@ -262,16 +263,54 @@ workflows:
       # - terraform-ec2-apply:
       #     requires:
       #       - terraform-ec2-hold-apply
-      - terraform-rds-plan-apply:
-          # requires:
-          #   - terraform-ec2-apply
-      - terraform-rds-hold-apply:
-          type: approval
-          requires:
-            - terraform-rds-plan-apply
-      - terraform-rds-apply:
-          requires:
-            - terraform-rds-hold-apply
+      # - terraform-rds-plan-apply:
+      #     requires:
+      #       - terraform-ec2-apply
+      # - terraform-rds-hold-apply:
+      #     type: approval
+      #     requires:
+      #       - terraform-rds-plan-apply
+      # - terraform-rds-apply:
+      #     requires:
+      #       - terraform-rds-hold-apply
+      # - terraform-rds-plan-destroy:
+      #     requires:
+      #       - terraform-rds-apply
+      # - terraform-rds-hold-destroy:
+      #     type: approval  
+      #     requires:
+      #       - terraform-rds-plan-destroy
+      # - terraform-rds-destroy:
+      #     requires:
+      #       - terraform-rds-hold-destroy
+      # - terraform-ec2-plan-destroy:
+      #     requires:
+      #       - terraform-rds-destroy
+      # - terraform-ec2-hold-destroy:
+      #     type: approval  
+      #     requires:
+      #       - terraform-ec2-plan-destroy
+      # - terraform-ec2-destroy:
+      #     requires:
+      #       - terraform-ec2-hold-destroy
+      # - terraform-network-plan-destroy:
+      #     requires:
+      #       - terraform-ec2-destroy
+      # - terraform-network-hold-destroy:
+      #     type: approval
+      #     requires:
+      #       - terraform-network-plan-destroy
+      # - terraform-network-destroy:
+      #     requires:
+      #       - terraform-network-hold-destroy
+
+      # Faster pipeline without Packer build and approvals
+      - terraform-network-plan-apply
+      - terraform-network-apply
+      - terraform-ec2-plan-apply
+      - terraform-ec2-apply
+      - terraform-rds-plan-apply
+      - terraform-rds-apply
       - terraform-rds-plan-destroy:
           requires:
             - terraform-rds-apply
