@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  shellcheck: circleci/shellcheck@0.7.1
+  shellcheck: circleci/shellcheck@2.2.2
   aws-cli: circleci/aws-cli@1.3.1
 
 jobs:
