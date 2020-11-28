@@ -318,8 +318,7 @@ workflows:
       #       - terraform-network-hold-destroy
 
       # Faster pipeline without Packer build
-      - shell-rds-vars:
-          context: aws
+      - shell-rds-vars
       - terraform-network-plan-apply
       - terraform-network-apply:
           requires:
