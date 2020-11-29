@@ -375,7 +375,7 @@ workflows:
       # EC2
       - terraform-ec2-plan-apply:
           requires:
-            - terraform-network-apply
+            - packer-build
       - terraform-ec2-apply:
           requires:
             - terraform-ec2-plan-apply
