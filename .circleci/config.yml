@@ -234,13 +234,27 @@ jobs:
           paths:
             - .
 
+  shell-packer-vars:
+    executor: aws-cli/default
+    steps:
+      - checkout
+      - aws-cli/setup:
+          profile-name: packer
+      - run:
+          name: shell-packer-vars
+          command: |
+            cd packer
+            aws ssm get-parameter --name wp-db-user --query 'Parameter.Value' > dbuser.txt
+            aws ssm get-parameter --name wp-db-password --with-decryption --query 'Parameter.Value' > dbpassword.txt
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
   packer-build:
     docker:
       - image: hashicorp/packer:light
-    executor: aws-cli/default
     steps:
-      - aws-cli/setup:
-          profile-name: rds
       - attach_workspace:
           at: .
       - run:
@@ -250,8 +264,8 @@ jobs:
             subnet_id=$(cat subnet_id.txt)
             db_host=$(cat dbhost.txt)
             db_name=$(cat dbname.txt)
-            db_user=$(aws ssm get-parameter --name wp-db-user --query 'Parameter.Value')
-            db_password=$(aws ssm get-parameter --name wp-db-password --with-decryption --query 'Parameter.Value')
+            db_user=$(cat dbuser.txt)
+            db_password=$(cat dbpassword.txt)
             packer build \
               -var subnet_id=$subnet_id \
               -var db_host=$db_host \
@@ -361,9 +375,12 @@ workflows:
       - packer-validate:
           requires:
             - terraform-rds-apply
-      - packer-build:
+      - shell-packer-vars:
           requires:
             - packer-validate
+      - packer-build:
+          requires:
+            - shell-packer-vars
 
       # EC2
       - terraform-ec2-plan-apply:
