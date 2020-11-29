@@ -14,8 +14,6 @@
   
   - name: Install php and mariadb
     command: amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
-    args:
-      creates: /sbin/nginx
 
   - name: Install httpd
     yum:
@@ -37,3 +35,18 @@
       src: https://wordpress.org/latest.tar.gz
       dest: /var/www/
       remote_src: "yes"
+
+  - name: Remove httpd default
+    file:
+      path: /var/www/html
+      state: absent
+
+  - name: Copy wp-config
+    template:
+      src: wp-config.php.j2
+      dest: /var/www/wordpress/wp-config.php
+    vars:
+      db_host: {{db_host}}
+      db_name: {{db_name}}
+      db_user: {{db_user}}
+      db_password: {{db_password}}

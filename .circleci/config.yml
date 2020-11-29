@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  shellcheck: circleci/shellcheck@2.2.2
+  # shellcheck: circleci/shellcheck@2.2.2 - TODO
   aws-cli: circleci/aws-cli@1.3.1
 
 jobs:
@@ -137,30 +137,37 @@ jobs:
 ####################################
 # RDS
 ####################################
-  shell-rds-vars:
-    executor: aws-cli/default
-    steps:
-      - checkout
-      - aws-cli/setup:
-          profile-name: rds
-      - run:
-          command: |
-            pwd
-            ls -la
-            cd scripts
-            sh rds_vars.sh
+  # shell-rds-vars:
+  #   executor: aws-cli/default
+  #   steps:
+  #     - checkout
+  #     - aws-cli/setup:
+  #         profile-name: rds
+  #     - run:
+  #         command: |
+  #           cd scripts
+  #           sh rds_vars.sh
+  #     - persist_to_workspace:
+  #         root: .
+  #         paths:
+  #           - .
 
   terraform-rds-plan-apply:
     docker:
       - image: hashicorp/terraform:light
+    executor: aws-cli/default
     steps:
       - attach_workspace:
           at: .
+      - aws-cli/setup:
+          profile-name: rds
+      - run:
+          command: |
+            cd scripts
+            sh rds_vars.sh
       - run:
           name: terraform init & plan
           command: |
-            pwd
-            ls -la
             cd terraform/rds
             terraform init -input=false
             terraform plan -out tfapply -var-file environment.tfvars
@@ -180,6 +187,8 @@ jobs:
           command: |
             cd terraform/rds
             terraform apply -auto-approve tfapply
+            terraform output dbhost >> ../../packer/dbhost.txt
+            terraform output dbname >> ../../packer/dbname.txt
       - persist_to_workspace:
           root: .
           paths:
@@ -235,15 +244,28 @@ jobs:
   packer-build:
     docker:
       - image: hashicorp/packer:light
+    executor: aws-cli/default
     steps:
+      - aws-cli/setup:
+          profile-name: rds
       - attach_workspace:
           at: .
       - run:
           name: packer-build
           command: |
             cd packer
-            subnet_id=`cat subnet_id.txt`
-            packer build -var subnet_id=$subnet_id packer.json
+            subnet_id=$(cat subnet_id.txt)
+            db_host=$(cat dbhost.txt)
+            db_name=$(cat dbname.txt)
+            db_user=$(aws ssm get-parameter --name wp-db-user --query 'Parameter.Value')
+            db_password=$(aws ssm get-parameter --name wp-db-password --with-decryption --query 'Parameter.Value')
+            packer build \
+              -var subnet_id=$subnet_id \
+              -var db_host=$db_host \
+              -var db_name=$db_name \
+              -var db_user=$db_user \
+              -var db_password=$db_password \
+              packer.json
       - persist_to_workspace:
           root: .
           paths:
@@ -324,50 +346,36 @@ workflows:
       #       - terraform-network-hold-destroy
 
       # Faster pipeline without Packer build
-      - shell-rds-vars
-      # - terraform-network-plan-apply
-      # - terraform-network-apply:
-      #     requires:
-      #       - terraform-network-plan-apply
-      # - terraform-ec2-plan-apply:
+
+      # Netowrk
+      - terraform-network-plan-apply
+      - terraform-network-apply:
+          requires:
+            - terraform-network-plan-apply
+      
+      # RDS
+      # - shell-rds-vars:
       #     requires:
       #       - terraform-network-apply
-      # - terraform-ec2-apply:
-      #     requires:
-      #       - terraform-ec2-plan-apply
-      # - terraform-rds-plan-apply:
-      #     requires:
-      #       - terraform-ec2-apply
-      # - terraform-rds-apply:
-      #     requires:
-      #       - terraform-rds-plan-apply
-      # - terraform-rds-plan-destroy:
-      #     requires:
-      #       - terraform-rds-apply
-      # - terraform-rds-hold-destroy:
-      #     type: approval  
-      #     requires:
-      #       - terraform-rds-plan-destroy
-      # - terraform-rds-destroy:
-      #     requires:
-      #       - terraform-rds-hold-destroy
-      # - terraform-ec2-plan-destroy:
-      #     requires:
-      #       - terraform-rds-destroy
-      # - terraform-ec2-hold-destroy:
-      #     type: approval  
-      #     requires:
-      #       - terraform-ec2-plan-destroy
-      # - terraform-ec2-destroy:
-      #     requires:
-      #       - terraform-ec2-hold-destroy
-      # - terraform-network-plan-destroy:
-      #     requires:
-      #       - terraform-ec2-destroy
-      # - terraform-network-hold-destroy:
-      #     type: approval
-      #     requires:
-      #       - terraform-network-plan-destroy
-      # - terraform-network-destroy:
-      #     requires:
-      #       - terraform-network-hold-destroy
+      - terraform-rds-plan-apply:
+          requires:
+            - terraform-network-apply
+      - terraform-rds-apply:
+          requires:
+            - terraform-rds-plan-apply
+
+      # Packer
+      - packer-validate:
+          requires:
+            - terraform-rds-apply
+      - packer-build:
+          requires:
+            - packer-validate
+
+      # EC2
+      - terraform-ec2-plan-apply:
+          requires:
+            - terraform-network-apply
+      - terraform-ec2-apply:
+          requires:
+            - terraform-ec2-plan-apply

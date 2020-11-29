@@ -9,7 +9,9 @@
         "region": "ap-southeast-2",
         "vpc_id": "",
         "subnet_id": "",
-        "environment": ""
+        "environment": "",
+        "db_host": "",
+        "db_name": ""
     },
 
     "builders": [
@@ -52,13 +54,21 @@
       {
         "type": "shell",
         "inline": [
-          "sudo amazon-linux-extras install ansible2"
+          "sudo amazon-linux-extras install -y ansible2"
         ]
       },
       {
         "type": "ansible-local",
-        "extra_arguments": ["--become"],
-        "playbook_file": "ansible/playbook.yml"
+        "playbook_file": "ansible/playbook.yml",
+        "extra_arguments": [
+          "--become"
+        ],
+        "groups": [
+          "{{ user `db_host` }}",
+          "{{ user `db_name` }}",
+          "{{ user `db_user }}",
+          "{{ user `db_password }}"
+        ]
       }
     ],
 

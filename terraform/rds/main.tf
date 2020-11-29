@@ -40,8 +40,8 @@ resource "aws_db_instance" "rds_mysql" {
   storage_type           = "gp2"
   engine                 = "mysql"
   engine_version         = "8.0.21"
-  instance_class         = "db.t3.micro"
-  name                   = "wordpress"
+  instance_class         = var.db_instance_class
+  name                   = var.db_name
   username               = var.db_user
   password               = var.db_password
   tags = {
