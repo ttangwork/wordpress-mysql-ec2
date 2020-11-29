@@ -280,6 +280,33 @@ jobs:
 
 workflows:
   version: 2
+  scheduled-packer-build:
+    triggers:
+          - schedule:
+              cron: "0 0 * * *"
+              filters:
+                branches:
+                  only:
+                    - master
+        jobs:
+        # Packer
+        - packer-validate:
+            requires:
+              - terraform-rds-apply
+        - shell-packer-vars:
+            requires:
+              - packer-validate
+        - packer-build:
+            requires:
+              - shell-packer-vars
+
+        # EC2
+        - terraform-ec2-plan-apply:
+            requires:
+              - packer-build
+        - terraform-ec2-apply:
+            requires:
+              - terraform-ec2-plan-apply
   aws-wordpress-mysql:
     jobs:
       # Complete pipeline

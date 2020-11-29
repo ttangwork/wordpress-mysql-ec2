@@ -66,8 +66,8 @@
         "groups": [
           "{{ user `db_host` }}",
           "{{ user `db_name` }}",
-          "{{ user `db_user }}",
-          "{{ user `db_password }}"
+          "{{ user `db_user` }}",
+          "{{ user `db_password` }}"
         ]
       }
     ],
