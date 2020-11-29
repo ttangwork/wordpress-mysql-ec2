@@ -137,34 +137,27 @@ jobs:
 ####################################
 # RDS
 ####################################
-  # shell-rds-vars:
-  #   executor: aws-cli/default
-  #   steps:
-  #     - checkout
-  #     - aws-cli/setup:
-  #         profile-name: rds
-  #     - run:
-  #         command: |
-  #           cd scripts
-  #           sh rds_vars.sh
-  #     - persist_to_workspace:
-  #         root: .
-  #         paths:
-  #           - .
-
-  terraform-rds-plan-apply:
-    docker:
-      - image: hashicorp/terraform:light
+  shell-rds-vars:
     executor: aws-cli/default
     steps:
-      - attach_workspace:
-          at: .
+      - checkout
       - aws-cli/setup:
           profile-name: rds
       - run:
           command: |
             cd scripts
             sh rds_vars.sh
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  terraform-rds-plan-apply:
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
       - run:
           name: terraform init & plan
           command: |
@@ -354,12 +347,12 @@ workflows:
             - terraform-network-plan-apply
       
       # RDS
-      # - shell-rds-vars:
-      #     requires:
-      #       - terraform-network-apply
-      - terraform-rds-plan-apply:
+      - shell-rds-vars:
           requires:
             - terraform-network-apply
+      - terraform-rds-plan-apply:
+          requires:
+            - shell-rds-vars
       - terraform-rds-apply:
           requires:
             - terraform-rds-plan-apply
