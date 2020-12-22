@@ -36,7 +36,7 @@ jobs:
           command: |
             cd terraform/network
             terraform apply -auto-approve tfapply
-            terraform output public_subnet_id_for_packer >> ../../packer/subnet_id.txt
+            terraform output public_subnet_id_for_packer | tr -d '"' >> ../../packer/subnet_id.txt
       - persist_to_workspace:
           root: .
           paths:
