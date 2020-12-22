@@ -41,12 +41,12 @@
       path: /var/www/html
       state: absent
 
-  # - name: show me
-  #   shell: pwd && ls -la
+  - name: show me
+    shell: cd /tmp/project/wordpress-mysql-ec2/packer/ansible && ls -la
 
   - name: Copy wp-config
     template:
-      src: templates/wp-config.php.j2
+      src: /tmp/project/wordpress-mysql-ec2/packer/ansible/templates/wp-config.php.j2
       dest: /var/www/wordpress/wp-config.php
     vars:
       db_host: "{{db_host}}"
