@@ -256,11 +256,11 @@ jobs:
       - image: hashicorp/packer:light
     steps:
       - attach_workspace:
-          at: /tmp/workspace
+          at: .
       - run:
           name: packer-build
           command: |
-            cd /tmp/workspace/packer
+            cd packer
             subnet_id=$(cat subnet_id.txt)
             db_host=$(cat dbhost.txt)
             db_name=$(cat dbname.txt)

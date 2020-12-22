@@ -60,6 +60,11 @@
         ]
       },
       {
+        "type": "file",
+        "source": "ansible/templates/wp-config.php.j2",
+        "destination": "/tmp/wp-config.php.j2"
+      },
+      {
         "type": "ansible-local",
         "playbook_file": "ansible/playbook.yml",
         "extra_arguments": [
