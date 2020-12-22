@@ -36,15 +36,13 @@
       dest: /var/www/
       remote_src: "yes"
 
-  - name: Remove httpd default
-    file:
-      path: /var/www/html
-      state: absent
+  - name: copy wp files
+    command: cp -r /var/www/wordpress/* /var/www/html/
 
   - name: Copy wp-config
     template:
       src: /tmp/wp-config.php.j2
-      dest: /var/www/wordpress/wp-config.php
+      dest: /var/www/html/wp-config.php
     vars:
       db_host: "{{db_host}}"
       db_name: "{{db_name}}"
