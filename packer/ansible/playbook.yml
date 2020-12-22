@@ -41,8 +41,8 @@
       path: /var/www/html
       state: absent
 
-  # - name: show me
-  #   command: pwd && ls -la
+  - name: show me
+    shell: pwd && ls -la
 
   - name: Copy wp-config
     template:
