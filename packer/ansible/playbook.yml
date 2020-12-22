@@ -46,7 +46,7 @@
 
   - name: Copy wp-config
     template:
-      src: ./ansible/templates/wp-config.php.j2
+      src: packer/ansible/templates/wp-config.php.j2
       dest: /var/www/wordpress/wp-config.php
     vars:
       db_host: "{{db_host}}"
