@@ -256,7 +256,7 @@ jobs:
       - image: hashicorp/packer:light
     steps:
       - attach_workspace:
-          at: .
+          at: /tmp/workspace
       - run:
           name: packer-build
           command: |
