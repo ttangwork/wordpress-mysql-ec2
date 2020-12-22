@@ -36,10 +36,10 @@
       dest: /var/www/
       remote_src: "yes"
 
-  - name: copy wp files
-    become: yes
-    become_user: root
-    command: cp -r /var/www/wordpress/* /var/www/html/
+  # - name: copy wp files
+  #   become: yes
+  #   become_user: root
+  #   command: cp -r /var/www/wordpress/* /var/www/html/
 
   - name: Copy wp-config
     template:
