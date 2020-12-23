@@ -20,7 +20,6 @@ Through the CircleCI pipeline, a workflow of creating AWS resources:
 3. Packer build using the latest Amazon Linux 2
 4. Create EC2 resources (ALB and ASG)
 
-
 ## Patching
 A scheduled job in CircleCI runs everyday at 2 AM to bake a new AMI using the latest Amazon Linux 2. Once the AMI is available, the launch configuration gets updated to use this AMI and relaunch EC2 instances.
 
