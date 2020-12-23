@@ -25,11 +25,6 @@
       name: httpd
       enabled: yes
 
-  - name: Restart httpd
-    service:
-      name: httpd
-      state: restarted
-
   - name: Download and Unarchive Wordpress
     unarchive:
       src: https://wordpress.org/latest.tar.gz
@@ -56,3 +51,8 @@
       db_name: "{{db_name}}"
       db_user: "{{db_user}}"
       db_password: "{{db_password}}"
+
+  - name: Restart httpd
+    service:
+      name: httpd
+      state: restarted
