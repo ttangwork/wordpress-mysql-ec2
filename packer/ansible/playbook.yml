@@ -46,8 +46,8 @@
     become: yes
     become_user: root
     copy:
-      - src: /var/www/wordpress/
-      - dest: /var/www/html
+      src: /var/www/wordpress/
+      dest: /var/www/html
 
   - name: Copy wp-config
     template:
