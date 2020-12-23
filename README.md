@@ -25,8 +25,8 @@ A scheduled job in CircleCI runs everyday at 2 AM to bake a new AMI using the la
 
 ## Destroy resources
 The pipeline doesn't have any tasks to destroy the resources. However you can run `destroy_all.sh` from `scripts` or run the following commands manually:  
-`terraform plan -destroy -out tfplan -var-file environment.tfvars`  
-`terraform apply -auto-approve tfplan`
+> `terraform plan -destroy -out tfplan -var-file environment.tfvars`  
+> `terraform apply -auto-approve tfplan`
 
 ## Known Issues
 ## References
