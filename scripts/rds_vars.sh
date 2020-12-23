@@ -39,8 +39,8 @@ else
     echo "The password already exists!"
 fi
 
-db_user=$(aws ssm get-parameter --name wp-db-user --query 'Parameter.Value')
-db_password=$(aws ssm get-parameter --name wp-db-password --with-decryption --query 'Parameter.Value')
+db_user=$(aws ssm get-parameter --name wp-db-user --query 'Parameter.Value'|tr -d '"')
+db_password=$(aws ssm get-parameter --name wp-db-password --with-decryption --query 'Parameter.Value'|tr -d '"')
 
 sed -i "s/{db_user}/${db_user}/g" ../terraform/rds/environment.tfvars
 sed -i "s/{db_password}/${db_password}/g" ../terraform/rds/environment.tfvars
