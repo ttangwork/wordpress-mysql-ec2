@@ -23,7 +23,7 @@ ssm_param_check=$(aws ssm get-parameters \
 
 if [[ "$ssm_param_check" == "null" ]]; then
     echo "Creating the password as it doesn't exist"
-    GENERATED_PASSWORD=$(</dev/urandom tr -dc 'A-Za-z0-9#$%' | head -c 32)
+    GENERATED_PASSWORD=$(</dev/urandom tr -dc 'A-Za-z0-9#%' | head -c 32)
 
     aws ssm put-parameter \
     --region "ap-southeast-2" \

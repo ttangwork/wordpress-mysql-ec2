@@ -35,11 +35,17 @@
       src: https://wordpress.org/latest.tar.gz
       dest: /var/www/
       remote_src: "yes"
+      owner: root
+      group: root
 
-  # - name: copy wp files
-  #   become: yes
-  #   become_user: root
-  #   command: cp -r /var/www/wordpress/* /var/www/html/
+  - name: Wait until the wordpress folder is present
+    wait_for:
+      path: /var/www/wordpress
+
+  - name: Copy wp files
+    become: yes
+    become_user: root
+    command: cp -r /var/www/wordpress/* /var/www/html/
 
   - name: Copy wp-config
     template:
