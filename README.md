@@ -24,7 +24,7 @@ Through the CircleCI pipeline, a workflow of creating AWS resources:
 A scheduled job in CircleCI runs everyday at 2 AM to bake a new AMI using the latest Amazon Linux 2. Once the AMI is available, the launch configuration gets updated to use this AMI and relaunch EC2 instances.
 
 ## Destroy resources
-The pipeline doesn't have any tasks to destroy the resources. However you can run `destroy_all.sh` from `scripts` or run the following commands manually:
+The pipeline doesn't have any tasks to destroy the resources. However you can run `destroy_all.sh` from `scripts` or run the following commands manually:  
 `terraform plan -destroy -out tfplan -var-file environment.tfvars`  
 `terraform apply -auto-approve tfplan`
 
