@@ -21,7 +21,7 @@ ssm_param_check=$(aws ssm get-parameters \
                 --with-decryption \
                 --query "Parameters[0].Value" | tr -d '"')
 
-if [[ "$ssm_param_check" == "null" ]]; then
+if [ "$ssm_param_check" = "null" ]; then
     echo "Creating the password as it doesn't exist"
     GENERATED_PASSWORD=$(</dev/urandom tr -dc 'A-Za-z0-9#%' | head -c 32)
 
