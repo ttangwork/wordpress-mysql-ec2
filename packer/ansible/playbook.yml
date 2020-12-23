@@ -45,7 +45,9 @@
   - name: Copy wp files
     become: yes
     become_user: root
-    command: cp -r /var/www/wordpress/* /var/www/html/
+    copy:
+      - src: /var/www/wordpress/
+      - dest: /var/www/html
 
   - name: Copy wp-config
     template:
