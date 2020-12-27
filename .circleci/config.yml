@@ -398,9 +398,7 @@ workflows:
               only:
                 - master
     jobs:
-      - packer-validate:
-          requires:
-            - terraform-rds-apply
+      - packer-validate
       - shell-packer-vars:
           requires:
             - packer-validate
