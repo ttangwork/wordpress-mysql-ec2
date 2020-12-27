@@ -392,11 +392,11 @@ workflows:
   scheduled-packer-build:
     triggers:
       - schedule:
-          cron: "0 0 * * *"
+          cron: "11 7 * * *"
           filters:
             branches:
               only:
-                - master
+                - feature/terraform
     jobs:
       - packer-validate
       - shell-packer-vars:
