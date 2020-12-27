@@ -280,33 +280,33 @@ jobs:
 
 workflows:
   version: 2
-  # scheduled-packer-build:
-  #   triggers:
-  #     - schedule:
-  #         cron: "0 0 * * *"
-  #         filters:
-  #           branches:
-  #             only:
-  #               - master
-  #     jobs:
-  #     - packer-validate:
-  #         requires:
-  #           - terraform-rds-apply
-  #     - shell-packer-vars:
-  #         requires:
-  #           - packer-validate
-  #     - packer-build:
-  #         requires:
-  #           - shell-packer-vars
-  #     - terraform-ec2-plan-apply:
-  #         requires:
-  #           - packer-build
-  #     - terraform-ec2-apply:
-  #         requires:
-  #           - terraform-ec2-plan-apply
+  scheduled-packer-build:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+      jobs:
+      - packer-validate:
+          requires:
+            - terraform-rds-apply
+      - shell-packer-vars:
+          requires:
+            - packer-validate
+      - packer-build:
+          requires:
+            - shell-packer-vars
+      - terraform-ec2-plan-apply:
+          requires:
+            - packer-build
+      - terraform-ec2-apply:
+          requires:
+            - terraform-ec2-plan-apply
   aws-wordpress-mysql:
     jobs:
-      # Complete pipeline
+      # Complete pipeline including "destroy"
       # - terraform-network-plan-apply
       # - terraform-network-hold-apply:
       #     type: approval
@@ -376,8 +376,7 @@ workflows:
       #     requires:
       #       - terraform-network-hold-destroy
 
-      # Faster pipeline without Packer build
-
+      # Pipeline without "destroy"
       # Netowrk
       - terraform-network-plan-apply
       - terraform-network-apply:
