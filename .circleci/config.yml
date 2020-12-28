@@ -227,8 +227,10 @@ jobs:
           name: terraform output
           command: |
             cd terraform/network
+            terraform init -input=false
             terraform output public_subnet_id_for_packer | tr -d '"' >> ../../packer/subnet_id.txt
             cd ../rds
+            terraform init -input=false
             terraform output hostname >> ../../packer/dbhost.txt
             terraform output dbname >> ../../packer/dbname.txt
       - persist_to_workspace:
@@ -410,7 +412,7 @@ workflows:
   scheduled-packer-build:
     triggers:
       - schedule:
-          cron: "0 6 * * *"
+          cron: "30 6 * * *"
           filters:
             branches:
               only:
