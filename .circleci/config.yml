@@ -218,6 +218,24 @@ jobs:
 ####################################
 # Packer
 ####################################
+  packer-params:
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - checkout
+      - run:
+          name: terraform output
+          command: |
+            cd terraform/network
+            terraform output public_subnet_id_for_packer | tr -d '"' >> ../../packer/subnet_id.txt
+            cd ../rds
+            terraform output hostname >> ../../packer/dbhost.txt
+            terraform output dbname >> ../../packer/dbname.txt
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
   packer-validate:
     docker:
       - image: hashicorp/packer:light
@@ -392,13 +410,16 @@ workflows:
   scheduled-packer-build:
     triggers:
       - schedule:
-          cron: "30 0 * * *"
+          cron: "0 6 * * *"
           filters:
             branches:
               only:
                 - feature/terraform
     jobs:
-      - packer-validate
+      - packer-params
+      - packer-validate:
+          requires:
+            - packer-params
       - shell-packer-vars:
           requires:
             - packer-validate
