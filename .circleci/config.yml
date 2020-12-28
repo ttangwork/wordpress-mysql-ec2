@@ -392,7 +392,7 @@ workflows:
   scheduled-packer-build:
     triggers:
       - schedule:
-          cron: "11 30 * * *"
+          cron: "30 0 * * *"
           filters:
             branches:
               only:
