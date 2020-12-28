@@ -233,6 +233,8 @@ jobs:
             terraform init -input=false
             terraform output hostname >> ../../packer/dbhost.txt
             terraform output dbname >> ../../packer/dbname.txt
+            cd ../ec2
+            terraform init -input=false
       - persist_to_workspace:
           root: .
           paths:
@@ -412,7 +414,7 @@ workflows:
   scheduled-packer-build:
     triggers:
       - schedule:
-          cron: "0 7 * * *"
+          cron: "0 8 * * *"
           filters:
             branches:
               only:
