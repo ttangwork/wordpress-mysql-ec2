@@ -392,7 +392,7 @@ workflows:
   scheduled-packer-build:
     triggers:
       - schedule:
-          cron: "10 10 * * *"
+          cron: "11 30 * * *"
           filters:
             branches:
               only:
@@ -405,9 +405,15 @@ workflows:
       - packer-build:
           requires:
             - shell-packer-vars
-      - terraform-ec2-plan-apply:
+      - terraform-ec2-plan-destroy:
           requires:
             - packer-build
+      - terraform-ec2-destroy:
+          requires:
+            - terraform-ec2-plan-destroy
+      - terraform-ec2-plan-apply:
+          requires:
+            - terraform-ec2-destroy
       - terraform-ec2-apply:
           requires:
             - terraform-ec2-plan-apply
