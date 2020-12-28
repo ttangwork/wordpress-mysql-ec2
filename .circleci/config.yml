@@ -36,7 +36,6 @@ jobs:
           command: |
             cd terraform/network
             terraform apply -auto-approve tfapply
-            terraform output public_subnet_id_for_packer | tr -d '"' >> ../../packer/subnet_id.txt
       - persist_to_workspace:
           root: .
           paths:
@@ -180,8 +179,6 @@ jobs:
           command: |
             cd terraform/rds
             terraform apply -auto-approve tfapply
-            terraform output hostname >> ../../packer/dbhost.txt
-            terraform output dbname >> ../../packer/dbname.txt
       - persist_to_workspace:
           root: .
           paths:
@@ -222,8 +219,7 @@ jobs:
     docker:
       - image: hashicorp/packer:light
     steps:
-      - attach_workspace:
-          at: .
+      - checkout
       - run:
           name: packer-validate
           command: |
@@ -246,6 +242,11 @@ jobs:
             cd packer
             aws ssm get-parameter --name wp-db-user --query 'Parameter.Value' > dbuser.txt
             aws ssm get-parameter --name wp-db-password --with-decryption --query 'Parameter.Value' > dbpassword.txt
+            cd ../terraform/network
+            terraform output public_subnet_id_for_packer | tr -d '"' >> ../../packer/subnet_id.txt
+            cd ../rds
+            terraform output hostname >> ../../packer/dbhost.txt
+            terraform output dbname >> ../../packer/dbname.txt
       - persist_to_workspace:
           root: .
           paths:
@@ -392,7 +393,7 @@ workflows:
   scheduled-packer-build:
     triggers:
       - schedule:
-          cron: "30 0 * * *"
+          cron: "30 5 * * *"
           filters:
             branches:
               only:
