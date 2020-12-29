@@ -1,0 +1,87 @@
+{
+    "variables": {
+        "build_tag": "",
+        "build_number": "",
+        "output_manifest_file": "packer-manifest.json",
+        "instance_profile": "",
+        "branch": "",
+        "component": "wordpress-mysql-image",
+        "region": "ap-southeast-2",
+        "vpc_id": "",
+        "subnet_id": "",
+        "environment": "",
+        "db_host": "",
+        "db_name": "",
+        "db_user": "",
+        "db_password": ""
+    },
+
+    "builders": [
+        {
+            "type": "amazon-ebs",
+            "region": "{{user `region`}}",
+            "instance_type": "t3.medium",
+            "ssh_username": "ec2-user",
+            "iam_instance_profile": "{{user `instance_profile`}}",
+            "ami_name": "{{user `component`}}-{{isotime | clean_resource_name}}",
+            "ami_description": "{{user `component`}}-{{isotime | clean_resource_name}}",
+            "vpc_id": "{{user `vpc_id`}}",
+            "subnet_id": "{{user `subnet_id`}}",
+            "source_ami_filter": {
+                "filters": {
+                  "virtualization-type": "hvm",
+                  "name": "amzn2-ami-hvm-2.0.*",
+                  "root-device-type": "ebs"
+                },
+                "owners": [
+                  "amazon"
+                ],
+                "most_recent": true
+            },
+            "tags": {
+                "Name": "{{user `component`}}-{{isotime | clean_resource_name}}",
+                "branch": "{{user `branch`}}",
+                "build_region": "{{.BuildRegion}}",
+                "component": "{{user `component`}}",
+                "date": "{{isotime}}",
+                "source_ami": "{{.SourceAMI}}"
+              },
+              "run_tags": {
+                "Name": "packer-build-{{user `component`}}-{{user `branch`}}"
+              }
+        }
+    ],
+    
+    "provisioners": [
+      {
+        "type": "shell",
+        "inline": [
+          "sudo amazon-linux-extras install -y ansible2"
+        ]
+      },
+      {
+        "type": "file",
+        "source": "ansible/templates/wp-config.php.j2",
+        "destination": "/tmp/wp-config.php.j2"
+      },
+      {
+        "type": "ansible-local",
+        "playbook_file": "ansible/playbook.yml",
+        "extra_arguments": [
+          "--become",
+          "--extra-vars db_host={{ user `db_host` }}",
+          "--extra-vars db_name={{ user `db_name` }}", 
+          "--extra-vars db_user={{ user `db_user` }}",
+          "--extra-vars db_password={{ user `db_password` }}"
+        ]
+      }
+    ],
+
+    "post-processors": [
+        {
+          "output": "manifest.json",
+          "strip_path": true,
+          "type": "manifest"
+        }
+    ]
+}

@@ -1,0 +1,58 @@
+---
+- name: Install and configure Wordpress
+  hosts: localhost
+
+  tasks:
+  # - name: Install ssm-agent
+  #   command: sudo yum install -y https://s3.ap-southeast-2.amazonaws.com/amazon-ssm-ap-southeast-2/latest/linux_amd64/amazon-ssm-agent.rpm
+  
+  # - name: Restart amazon-ssm-agent
+  #   service:
+  #     name: amazon-ssm-agent
+  #     state: restarted
+
+  
+  - name: Install php and mariadb
+    command: amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
+
+  - name: Install httpd
+    yum:
+      name: httpd
+      state: latest
+  
+  - name: Enable httpd service
+    service:
+      name: httpd
+      enabled: yes
+
+  - name: Download and Unarchive Wordpress
+    unarchive:
+      src: https://wordpress.org/latest.tar.gz
+      dest: /var/www/
+      remote_src: "yes"
+      owner: root
+      group: root
+
+  - name: Wait until the wordpress folder is present
+    wait_for:
+      path: /var/www/wordpress
+
+  - name: Copy wp files
+    become: yes
+    become_user: root
+    shell: cp -r /var/www/wordpress/* /var/www/html/
+
+  - name: Copy wp-config
+    template:
+      src: /tmp/wp-config.php.j2
+      dest: /var/www/html/wp-config.php
+    vars:
+      db_host: "{{db_host}}"
+      db_name: "{{db_name}}"
+      db_user: "{{db_user}}"
+      db_password: "{{db_password}}"
+
+  - name: Restart httpd
+    service:
+      name: httpd
+      state: restarted
