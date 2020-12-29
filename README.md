@@ -38,7 +38,7 @@ Through the CircleCI pipeline, a workflow of creating AWS resources:
 ## Scheduled builds
 
 You can schedule a job to regularly rebuild EC2 using the latest AMI and WordPress. This can be done by creating a branch named `feature/scheduled-packer-build` off `master` branch. The schedule can be set by updating the cron expression in `.cricleci/config.yml`:  
-> `cron: "0 14 * * *"`
+> `cron: "0 14 * * *"`  
 Note that CircleCI uses UTC for cron therefore the example above is 1 AM (UTC+11:00).
 
 ## Destroy resources
