@@ -414,11 +414,11 @@ workflows:
   scheduled-packer-build:
     triggers:
       - schedule:
-          cron: "0 8 * * *"
+          cron: "0 14 * * *"
           filters:
             branches:
               only:
-                - feature/terraform
+                - feature/scheduled-packer-build
     jobs:
       - packer-params
       - packer-validate:
