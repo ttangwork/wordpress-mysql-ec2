@@ -37,9 +37,9 @@ resource "aws_db_instance" "rds_mysql" {
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
   skip_final_snapshot    = true
   allocated_storage      = 20
-  storage_type           = "gp2"
-  engine                 = "mysql"
-  engine_version         = "8.0.21"
+  storage_type           = var.db_storage
+  engine                 = var.db_engine
+  engine_version         = var.db_version
   instance_class         = var.db_instance_class
   name                   = var.db_name
   username               = var.db_user
