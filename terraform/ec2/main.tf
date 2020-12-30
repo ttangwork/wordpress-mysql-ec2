@@ -100,7 +100,7 @@ resource "aws_autoscaling_group" "asg" {
   target_group_arns         = [aws_lb_target_group.lb_target_group.arn]
   force_delete              = true
   launch_configuration      = aws_launch_configuration.lc.name
-  vpc_zone_identifier       = data.terraform_remote_state.vpc.outputs.public_subnet_ids
+  vpc_zone_identifier       = data.terraform_remote_state.vpc.outputs.private_subnet_ids
 
   tag {
     key                 = "Name"

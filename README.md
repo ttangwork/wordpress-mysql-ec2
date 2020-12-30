@@ -2,7 +2,8 @@
 
 [![ttangwork](https://circleci.com/gh/ttangwork/wordpress-mysql-ec2.svg?style=svg)](https://circleci.com/gh/ttangwork/wordpress-mysql-ec2)
 
-IaC solution for wordpress and mysql running on ec2.
+IaC solution for wordpress and mysql running on ec2.  
+![Architecture](docs/wordpress-mysql-ec2.png "Architecture")
 
 ## Prerequesites
 
@@ -28,27 +29,28 @@ Run `s3-backend` manually to create the backend bucket. Once the bucket is creat
 
 ## Run
 
-Through the CircleCI pipeline, a workflow of creating AWS resources:
+Through CircleCI pipeline, a workflow of creating AWS resources:
 
 1. Create network resources (VPC, Subnets, Gateways, Routing)
 2. Create RDS resources (MariaDB)
 3. Packer build using the latest Amazon Linux 2
 4. Create EC2 resources (ALB and ASG)
 
+You will need to specify a keypair for your EC2 in its `environment.tfvars` file:
+> `key_name = "ec2_instance1" # specify the EC2 keypair here`
+
 ## Scheduled builds
 
 You can schedule a job to regularly rebuild EC2 using the latest AMI and WordPress. This can be done by creating a branch named `feature/scheduled-packer-build` off `master` branch. The schedule can be set by updating the cron expression in `.cricleci/config.yml`:  
 > `cron: "0 14 * * *"`
 
-Note that CircleCI uses UTC for cron therefore the example above is 1:00 AM (Australian EST DST UTC+11:00).
+CircleCI uses UTC for cron therefore the example above is 1:00 AM (Australian EST DST UTC+11:00).
 
 ## Destroy resources
 
 The pipeline workflow doesn't include any steps to destroy the resources however you can find the workflow that contains destroy steps from the commented sections in `.cricleci/config.yml`. If you have Terraform installed and configured locally, you can run `scripts/destroy_all.sh` or run the following commands manually from `terraform/ec2`, `terraform/rds` and `terraform/network` folders:  
 > `terraform plan -destroy -out tfplan -var-file environment.tfvars`  
 > `terraform apply -auto-approve tfplan`
-
-## Known Issues
 
 ## References
 
