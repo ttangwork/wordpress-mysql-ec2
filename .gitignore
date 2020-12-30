@@ -33,3 +33,6 @@ override.tf.json
 
 # Ignore packer build manifest
 manifest.json
+
+# MacOS
+.DS_Store
