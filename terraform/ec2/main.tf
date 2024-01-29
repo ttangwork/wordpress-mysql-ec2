@@ -1,6 +1,6 @@
 # security groups
 resource "aws_security_group" "alb_sg" {
-  name        = format("%s-alb_sg", var.app_prefix)
+  name        = format("%s-alb_sg", var.ec2_prefix)
   description = "Allow inbound HTTP traffic"
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
 
@@ -20,12 +20,12 @@ resource "aws_security_group" "alb_sg" {
   }
 
   tags = {
-    Name = format("%s-alb-sg", var.app_prefix)
+    Name = format("%s-alb-sg", var.ec2_prefix)
   }
 }
 
 resource "aws_security_group" "asg_sg" {
-  name        = format("%s-asg_sg", var.app_prefix)
+  name        = format("%s-asg_sg", var.ec2_prefix)
   description = "Allow inbound HTTP traffic"
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
 
@@ -45,25 +45,25 @@ resource "aws_security_group" "asg_sg" {
   }
 
   tags = {
-    Name = format("%s-asg-sg", var.app_prefix)
+    Name = format("%s-asg-sg", var.ec2_prefix)
   }
 }
 
 # application load balancer
 resource "aws_lb" "lb" {
-  name               = format("%s-lb", var.app_prefix)
+  name               = format("%s-lb", var.ec2_prefix)
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb_sg.id]
   subnets            = data.terraform_remote_state.vpc.outputs.public_subnet_ids
 
   tags = {
-    Name = format("%s-lb", var.app_prefix)
+    Name = format("%s-lb", var.ec2_prefix)
   }
 }
 
 resource "aws_lb_target_group" "lb_target_group" {
-  name     = format("%s-lb-target-group", var.app_prefix)
+  name     = format("%s-lb-target-group", var.ec2_prefix)
   port     = 80
   protocol = "HTTP"
   vpc_id   = data.terraform_remote_state.vpc.outputs.vpc_id
@@ -82,7 +82,7 @@ resource "aws_lb_listener" "lb_listener" {
 
 # launch configuration
 resource "aws_launch_configuration" "lc" {
-  name            = format("%s-lc", var.app_prefix)
+  name            = format("%s-lc", var.ec2_prefix)
   image_id        = data.aws_ami.ami.id
   instance_type   = var.instance_type
   key_name        = var.key_name
@@ -91,7 +91,7 @@ resource "aws_launch_configuration" "lc" {
 
 # auto scaling group
 resource "aws_autoscaling_group" "asg" {
-  name                      = format("%s-asg", var.app_prefix)
+  name                      = format("%s-asg", var.ec2_prefix)
   max_size                  = var.max_size
   min_size                  = var.min_size
   desired_capacity          = var.desired_capacity
@@ -104,7 +104,7 @@ resource "aws_autoscaling_group" "asg" {
 
   tag {
     key                 = "Name"
-    value               = format("%s-asg", var.app_prefix)
+    value               = format("%s-asg", var.ec2_prefix)
     propagate_at_launch = true
   }
 }

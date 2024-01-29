@@ -1,4 +1,4 @@
-variable "app_prefix" {
+variable "ec2_prefix" {
   description = "prefix of ec2 instance"
   type        = string
   default     = "wordpress-mysql"
