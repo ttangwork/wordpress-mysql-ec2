@@ -24,12 +24,12 @@ variable "key_name" {
   default     = "ec2_instance_key"
 }
 variable "instance_type" {
-    description = "ec2 instance type"
-    type = string
-    default = "t3.micro"
+  description = "ec2 instance type"
+  type        = string
+  default     = "t3.micro"
 }
 variable "health_check_grace_period" {
   description = "health check grace period"
-  type = number
-  default = 300
+  type        = number
+  default     = 300
 }
