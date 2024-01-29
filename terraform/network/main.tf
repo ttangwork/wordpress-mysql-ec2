@@ -5,7 +5,7 @@ resource "aws_vpc" "vpc" {
   enable_dns_hostnames = true
 
   tags = {
-    Name = format("%s-vpc", var.app_prefix)
+    Name = format("%s-vpc", var.network_prefix)
   }
 }
 
@@ -18,7 +18,7 @@ resource "aws_subnet" "public_subnets" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = format("%s-public-subnet-az%d", var.app_prefix, count.index + 1),
+    Name = format("%s-public-subnet-az%d", var.network_prefix, count.index + 1),
   }
 }
 
@@ -30,7 +30,7 @@ resource "aws_subnet" "private_subnets" {
   cidr_block        = var.private_subnet_cidrs[count.index]
 
   tags = {
-    Name = format("%s-private-subnet-az%d", var.app_prefix, count.index + 1),
+    Name = format("%s-private-subnet-az%d", var.network_prefix, count.index + 1),
   }
 }
 
@@ -39,7 +39,7 @@ resource "aws_eip" "eip" {
   count = length(aws_subnet.public_subnets[*].id)
 
   tags = {
-    Name = format("%s-eip", var.app_prefix)
+    Name = format("%s-eip", var.network_prefix)
   }
 }
 
@@ -50,7 +50,7 @@ resource "aws_nat_gateway" "nat_gateway" {
   allocation_id = aws_eip.eip[count.index].id
 
   tags = {
-    Name = format("%s-nat-gateway-%s", var.app_prefix, var.az_list[count.index])
+    Name = format("%s-nat-gateway-%s", var.network_prefix, var.az_list[count.index])
   }
 }
 
@@ -59,7 +59,7 @@ resource "aws_internet_gateway" "internet_gateway" {
   vpc_id = aws_vpc.vpc.id
 
   tags = {
-    Name = format("%s-internet-gateway", var.app_prefix)
+    Name = format("%s-internet-gateway", var.network_prefix)
   }
 }
 
@@ -69,7 +69,7 @@ resource "aws_route_table" "private_route_table" {
   vpc_id = aws_vpc.vpc.id
 
   tags = {
-    Name = format("%s-private-route-table", var.app_prefix)
+    Name = format("%s-private-route-table", var.network_prefix)
   }
 }
 
@@ -93,7 +93,7 @@ resource "aws_route_table" "public_route_table" {
   vpc_id = aws_vpc.vpc.id
 
   tags = {
-    Name = format("%s-public-route-table", var.app_prefix)
+    Name = format("%s-public-route-table", var.network_prefix)
   }
 }
 
