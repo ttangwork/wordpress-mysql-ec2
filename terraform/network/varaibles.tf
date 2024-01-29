@@ -29,7 +29,7 @@ variable "private_subnet_cidrs" {
   type        = list(string)
 }
 
-variable "app_prefix" {
-  description = "app prefix"
+variable "network_prefix" {
+  description = "network prefix"
   type        = string
 }

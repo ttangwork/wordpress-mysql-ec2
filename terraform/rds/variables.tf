@@ -1,5 +1,5 @@
-variable "app_prefix" {
-  description = "app prefix"
+variable "db_prefix" {
+  description = "database prefix"
   type        = string
 }
 variable "db_instance_class" {

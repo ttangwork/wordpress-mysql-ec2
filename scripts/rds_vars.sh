@@ -44,4 +44,3 @@ db_password=$(aws ssm get-parameter --name wp-db-password --with-decryption --qu
 
 sed -i "s/{db_user}/${db_user}/g" ../terraform/rds/environment.tfvars
 sed -i "s/{db_password}/${db_password}/g" ../terraform/rds/environment.tfvars
-

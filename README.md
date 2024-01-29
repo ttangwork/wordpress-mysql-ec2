@@ -8,12 +8,16 @@ IaC solution for wordpress and mysql running on ec2.
 ## Prerequesites
 
 The solution was created using Terraform 0.14.3 with HashiCorp AWS provider 3.22.0.  
-In order to remove the AWS resources built by the pipeline, you need to have Terraform installed locally. The pipeline doesn't destroy resources however you can review the commented sections in `.circleci/config.yml` to restore steps for destroying the resources.  
+In order to remove the AWS resources built by the pipeline, you need to have Terraform installed locally. The pipeline doesn't destroy resources however you can review the commented sections in [circleci config](.circleci/config.yml) to restore steps for destroying the resources.  
 Terraform state is stored in S3 backend which needs to be created manually. See more details about S3 backend below.
+
+## Security
+
+The current solution is using HTTP on port 80 as the default protocol however this is not safe in the real world. You *MUST* use HTTPS and harden the servers.
 
 ### AWS SSM parameters
 
-The following SSM parameters are created by `rds_vars.sh` script therefore the Terraform state file doesn't contain the password.
+The following SSM parameters are created by [rds_vars.sh](./scripts/rds_vars.sh) script therefore the Terraform state file doesn't contain the password.
 
 * wp-db-user
 * wp-db-password
@@ -39,13 +43,13 @@ Through CircleCI pipeline, a workflow of creating AWS resources:
 
 You will need to specify a keypair for your EC2 in its `environment.tfvars` file:
 
-```sh
-key_name = "ec2_instance1" # specify the EC2 keypair here
+```hcl
+key_name = "ec2_instance_key" 
 ```
 
 ## Scheduled builds
 
-You can schedule a job to regularly rebuild EC2 using the latest AMI and WordPress. This can be done by creating a branch named `feature/scheduled-packer-build` off `master` branch. The schedule can be set by updating the cron expression in `.cricleci/config.yml`:  
+You can schedule a job to regularly rebuild EC2 using the latest AMI and WordPress. This can be done by creating a branch named `feature/scheduled-packer-build` off `master` branch. The schedule can be set by updating the cron expression in [circleci config](.circleci/config.yml):  
 
 ```sh
 cron: "0 14 * * *"
@@ -55,9 +59,9 @@ CircleCI uses UTC for cron therefore the example above is 1:00 AM (Australian ES
 
 ## Destroy resources
 
-The pipeline workflow doesn't include any steps to destroy the resources however you can find the workflow that contains destroy steps from the commented sections in `.cricleci/config.yml`. If you have Terraform installed and configured locally, you can run `scripts/destroy_all.sh` or run the following commands manually from `terraform/ec2`, `terraform/rds` and `terraform/network` folders:
+The destroy steps in [circleci config](.cricleci/config.yml) have been commented out. If you have Terraform installed and configured locally, you can run [destroy_all.sh](./scripts/destroy_all.sh) or run the following commands manually from [terraform/ec2](./terraform/ec2/), [terraform/rds](./terraform/rds/) and [terraform/network](./terraform/network/) folders:
 
-```sh
+```hcl
 terraform plan -destroy -out tfplan -var-file environment.tfvars
 terraform apply -auto-approve tfplan
 ```
@@ -65,8 +69,7 @@ terraform apply -auto-approve tfplan
 ## ToDo
 
 * Ansible review/rewrite
-* CircelCI pipeline review/rewrite - maybe will move to BuildKite instead
-* Integrating DynamoDB for state locking
+* Github Actions
 
 ## References
 
