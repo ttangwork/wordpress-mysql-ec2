@@ -11,6 +11,10 @@ The solution was created using Terraform 0.14.3 with HashiCorp AWS provider 3.22
 In order to remove the AWS resources built by the pipeline, you need to have Terraform installed locally. The pipeline doesn't destroy resources however you can review the commented sections in `.circleci/config.yml` to restore steps for destroying the resources.  
 Terraform state is stored in S3 backend which needs to be created manually. See more details about S3 backend below.
 
+## Security
+
+The current solution is using HTTP on port 80 as the default protocol however this is not safe in the real world. You *MUST* use HTTPS and harden the servers.
+
 ### AWS SSM parameters
 
 The following SSM parameters are created by `rds_vars.sh` script therefore the Terraform state file doesn't contain the password.
