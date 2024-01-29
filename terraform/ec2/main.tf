@@ -84,8 +84,8 @@ resource "aws_lb_listener" "lb_listener" {
 resource "aws_launch_configuration" "lc" {
   name            = format("%s-lc", var.app_prefix)
   image_id        = data.aws_ami.ami.id
-  instance_type   = "t3.micro"
-  key_name = var.key_name
+  instance_type   = var.instance_type
+  key_name        = var.key_name
   security_groups = [aws_security_group.asg_sg.id]
 }
 
@@ -95,7 +95,7 @@ resource "aws_autoscaling_group" "asg" {
   max_size                  = var.max_size
   min_size                  = var.min_size
   desired_capacity          = var.desired_capacity
-  health_check_grace_period = 300
+  health_check_grace_period = var.health_check_grace_period
   health_check_type         = "ELB"
   target_group_arns         = [aws_lb_target_group.lb_target_group.arn]
   force_delete              = true
