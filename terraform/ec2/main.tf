@@ -6,16 +6,16 @@ resource "aws_security_group" "alb_sg" {
 
   ingress {
     description = "HTTP inbound"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = var.alb_ingress_from
+    to_port     = var.alb_ingress_to
+    protocol    = var.alb_ingress_protocol
+    cidr_blocks = var.alb_ingress_cidr
   }
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port   = var.alb_egress_from
+    to_port     = var.alb_egress_to
+    protocol    = var.alb_egress_protocol
     cidr_blocks = [data.terraform_remote_state.vpc.outputs.vpc_cidr]
   }
 
@@ -31,17 +31,17 @@ resource "aws_security_group" "asg_sg" {
 
   ingress {
     description     = "Inbound HTTP from ALB"
-    from_port       = 80
-    to_port         = 80
-    protocol        = "tcp"
+    from_port       = var.asg_ingress_from
+    to_port         = var.asg_ingress_to
+    protocol        = var.asg_ingress_protocol
     security_groups = [aws_security_group.alb_sg.id]
   }
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port   = var.asg_ingress_from
+    to_port     = var.asg_ingress_to
+    protocol    = var.asg_egress_protocol
+    cidr_blocks = var.asg_egress_cidr
   }
 
   tags = {
@@ -52,8 +52,8 @@ resource "aws_security_group" "asg_sg" {
 # application load balancer
 resource "aws_lb" "lb" {
   name               = format("%s-lb", var.ec2_prefix)
-  internal           = false
-  load_balancer_type = "application"
+  internal           = var.lb_internal
+  load_balancer_type = var.lb_type
   security_groups    = [aws_security_group.alb_sg.id]
   subnets            = data.terraform_remote_state.vpc.outputs.public_subnet_ids
 
@@ -64,18 +64,18 @@ resource "aws_lb" "lb" {
 
 resource "aws_lb_target_group" "lb_target_group" {
   name     = format("%s-lb-target-group", var.ec2_prefix)
-  port     = 80
-  protocol = "HTTP"
+  port     = var.lb_target_group_port
+  protocol = var.lb_target_group_protocol
   vpc_id   = data.terraform_remote_state.vpc.outputs.vpc_id
 }
 
 resource "aws_lb_listener" "lb_listener" {
   load_balancer_arn = aws_lb.lb.arn
-  port              = "80"
-  protocol          = "HTTP"
+  port              = var.lb_listener_port
+  protocol          = var.lb_listener_protocol
 
   default_action {
-    type             = "forward"
+    type             = var.lb_listener_action_type
     target_group_arn = aws_lb_target_group.lb_target_group.arn
   }
 }
@@ -96,9 +96,9 @@ resource "aws_autoscaling_group" "asg" {
   min_size                  = var.min_size
   desired_capacity          = var.desired_capacity
   health_check_grace_period = var.health_check_grace_period
-  health_check_type         = "ELB"
+  health_check_type         = var.health_check_type
   target_group_arns         = [aws_lb_target_group.lb_target_group.arn]
-  force_delete              = true
+  force_delete              = var.asg_force_delete
   launch_configuration      = aws_launch_configuration.lc.name
   vpc_zone_identifier       = data.terraform_remote_state.vpc.outputs.private_subnet_ids
 

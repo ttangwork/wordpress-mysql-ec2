@@ -37,3 +37,33 @@ variable "db_storage" {
   description = "Database storage type"
   type        = string
 }
+variable "ingress_from_port" {
+  description = "ingress from port"
+  type        = number
+  default     = 3306
+}
+variable "ingress_to_port" {
+  description = "ingress to port"
+  type        = number
+  default     = 3306
+}
+variable "egress_from_port" {
+  description = "egress from port"
+  type        = number
+  default     = 0
+}
+variable "egress_to_port" {
+  description = "egress to port"
+  type        = number
+  default     = 0
+}
+variable "protocol" {
+  description = "db transport protocol"
+  type        = string
+  default     = "tcp"
+}
+variable "allocated_storage" {
+  description = "db allocated storage in GB"
+  type        = number
+  default     = 20
+}

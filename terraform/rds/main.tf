@@ -14,15 +14,15 @@ resource "aws_security_group" "rds_sg" {
 
   ingress {
     description = "DB inbound"
-    from_port   = 3306
-    to_port     = 3306
-    protocol    = "tcp"
+    from_port   = var.ingress_from_port
+    to_port     = var.ingress_to_port
+    protocol    = var.protocol
     cidr_blocks = [data.terraform_remote_state.vpc.outputs.vpc_cidr]
   }
 
   egress {
-    from_port   = 0
-    to_port     = 0
+    from_port   = var.egress_from_port
+    to_port     = var.egress_to_port
     protocol    = "-1"
     cidr_blocks = [data.terraform_remote_state.vpc.outputs.vpc_cidr]
   }
@@ -36,7 +36,7 @@ resource "aws_db_instance" "rds_mysql" {
   db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.id
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
   skip_final_snapshot    = true
-  allocated_storage      = 20
+  allocated_storage      = var.allocated_storage
   storage_type           = var.db_storage
   engine                 = var.db_engine
   engine_version         = var.db_version
