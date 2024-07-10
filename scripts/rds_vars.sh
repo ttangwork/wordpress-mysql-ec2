@@ -13,7 +13,7 @@ aws ssm put-parameter \
 set +x
 
 
-KMS_KEY_ARN="arn:aws:kms:ap-southeast-2:461161570059:alias/wordpress_mysql_kms_key"
+KMS_KEY_ARN="YOUR_KMS_KEY"
 
 ssm_param_check=$(aws ssm get-parameters \
                 --region "ap-southeast-2" \
