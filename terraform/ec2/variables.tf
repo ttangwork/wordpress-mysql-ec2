@@ -75,17 +75,22 @@ variable "alb_egress_to" {
   type        = number
   default     = 0
 }
+variable "alb_egress_cidr" { # Moved before protocol for original order
+  description = "List of CIDR blocks for ALB egress. Defaults to no egress unless specified."
+  type        = list(string)
+  default     = [] # Changed from ["0.0.0.0/0"]
+}
 variable "alb_egress_protocol" {
-  description = "alb egress protocol"
+  description = "Protocol for ALB egress. Defaults to TCP. Relevant if alb_egress_cidr is not empty."
   type        = string
-  default     = "-1"
+  default     = "tcp" # Changed from -1
 }
 
 ## asg security group
 variable "asg_egress_cidr" {
-  description = "asg egress cidr"
+  description = "List of CIDR blocks for ASG instances egress. Defaults to no egress unless specified. Instances may need internet access for updates or to reach external services."
   type        = list(string)
-  default     = ["0.0.0.0/0"]
+  default     = [] # Changed from ["0.0.0.0/0"]
 }
 variable "asg_ingress_from" {
   description = "asg ingress from port"
@@ -113,9 +118,9 @@ variable "asg_egress_to" {
   default     = 0
 }
 variable "asg_egress_protocol" {
-  description = "asg egress protocol"
+  description = "Protocol for ASG egress. Defaults to TCP. Relevant if asg_egress_cidr is not empty."
   type        = string
-  default     = "-1"
+  default     = "tcp" # Changed from -1
 }
 
 ##lb
@@ -153,4 +158,16 @@ variable "lb_listener_action_type" {
   description = "lb listener default action type"
   type        = string
   default     = "forward"
+}
+
+variable "aws_region" {
+  description = "AWS region for provider."
+  type        = string
+  default     = "ap-southeast-2" # From previous hardcoded value in provider
+}
+
+variable "backend_s3_bucket" {
+  description = "S3 bucket for Terraform backend state files."
+  type        = string
+  # No default value
 }

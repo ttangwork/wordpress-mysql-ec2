@@ -55,7 +55,7 @@ resource "aws_lb" "lb" {
   internal           = var.lb_internal
   load_balancer_type = var.lb_type
   security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = data.terraform_remote_state.vpc.outputs.public_subnet_ids
+  subnets            = values(data.terraform_remote_state.vpc.outputs.public_subnet_ids)
 
   tags = {
     Name = format("%s-lb", var.ec2_prefix)
@@ -81,12 +81,28 @@ resource "aws_lb_listener" "lb_listener" {
 }
 
 # launch configuration
-resource "aws_launch_configuration" "lc" {
-  name            = format("%s-lc", var.ec2_prefix)
-  image_id        = data.aws_ami.ami.id
-  instance_type   = var.instance_type
-  key_name        = var.key_name
-  security_groups = [aws_security_group.asg_sg.id]
+# resource "aws_launch_configuration" "lc" {
+#   name            = format("%s-lc", var.ec2_prefix)
+#   image_id        = data.aws_ami.ami.id
+#   instance_type   = var.instance_type
+#   key_name        = var.key_name
+#   security_groups = [aws_security_group.asg_sg.id]
+# }
+
+# launch template
+resource "aws_launch_template" "lt" {
+  name          = format("%s-lt", var.ec2_prefix)
+  image_id      = data.aws_ami.ami.id
+  instance_type = var.instance_type
+  key_name      = var.key_name
+  vpc_security_group_ids = [aws_security_group.asg_sg.id]
+
+  # Add other configurations like user_data, block_device_mappings, iam_instance_profile if needed
+  # e.g., user_data = base64encode(file("user_data.sh"))
+
+  tags = {
+    Name = format("%s-lt", var.ec2_prefix)
+  }
 }
 
 # auto scaling group
@@ -99,8 +115,13 @@ resource "aws_autoscaling_group" "asg" {
   health_check_type         = var.health_check_type
   target_group_arns         = [aws_lb_target_group.lb_target_group.arn]
   force_delete              = var.asg_force_delete
-  launch_configuration      = aws_launch_configuration.lc.name
-  vpc_zone_identifier       = data.terraform_remote_state.vpc.outputs.private_subnet_ids
+  # launch_configuration      = aws_launch_configuration.lc.name
+  vpc_zone_identifier       = values(data.terraform_remote_state.vpc.outputs.private_subnet_ids)
+
+  launch_template {
+    id      = aws_launch_template.lt.id
+    version = "$Latest"
+  }
 
   tag {
     key                 = "Name"

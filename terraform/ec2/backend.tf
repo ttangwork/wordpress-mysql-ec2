@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
-    bucket = "USE_YOUR_OWN_S3_BUCKET"
+    bucket = var.backend_s3_bucket
     key    = "ec2.tfstate"
-    region = "ap-southeast-2"
+    region = var.aws_region
   }
 }

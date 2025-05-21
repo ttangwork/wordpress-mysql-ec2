@@ -1,11 +1,18 @@
 variable "region" {
-  description = "AWS Region"
+  description = "AWS Region" # This is for AZ construction like ap-southeast-2a, not the provider region
   type        = string
 }
 
-variable "az_count" {
-  description = "Number of availability zones"
-  type        = number
+variable "aws_region" {
+  description = "AWS region for provider."
+  type        = string
+  default     = "ap-southeast-2" # From previous hardcoded value in provider
+}
+
+variable "backend_s3_bucket" {
+  description = "S3 bucket for Terraform backend state files."
+  type        = string
+  # No default value
 }
 
 variable "az_list" {

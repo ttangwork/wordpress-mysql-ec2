@@ -16,6 +16,10 @@ variable "db_user" {
   type        = string
   sensitive   = true
 }
+
+# For production environments, it is highly recommended to manage the database
+# password using AWS Secrets Manager or a similar service and retrieve it
+# using a data source instead of passing it as a direct variable.
 variable "db_password" {
   description = "Database password"
   type        = string
@@ -66,4 +70,21 @@ variable "allocated_storage" {
   description = "db allocated storage in GB"
   type        = number
   default     = 20
+}
+
+variable "ec2_asg_security_group_id" {
+  description = "The security group ID of the EC2 Auto Scaling Group that needs access to the RDS instance."
+  type        = string
+}
+
+variable "aws_region" {
+  description = "AWS region for provider."
+  type        = string
+  default     = "ap-southeast-2" # From previous hardcoded value in provider
+}
+
+variable "backend_s3_bucket" {
+  description = "S3 bucket for Terraform backend state files."
+  type        = string
+  # No default value
 }

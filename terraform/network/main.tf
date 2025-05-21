@@ -9,48 +9,55 @@ resource "aws_vpc" "vpc" {
   }
 }
 
+locals {
+  # Ensure az_list and subnet CIDR lists are of the same length for zipping.
+  # This assumes a direct mapping by index.
+  public_subnet_az_map = zipmap(var.az_list, var.public_subnet_cidrs)
+  private_subnet_az_map = zipmap(var.az_list, var.private_subnet_cidrs)
+}
+
 # public subnets
 resource "aws_subnet" "public_subnets" {
-  count                   = var.az_count
+  for_each                = local.public_subnet_az_map
   vpc_id                  = aws_vpc.vpc.id
-  availability_zone       = "${var.region}${var.az_list[count.index]}"
-  cidr_block              = var.public_subnet_cidrs[count.index]
+  availability_zone       = "${var.region}${each.key}"
+  cidr_block              = each.value
   map_public_ip_on_launch = true
 
   tags = {
-    Name = format("%s-public-subnet-az%d", var.network_prefix, count.index + 1),
+    Name = format("%s-public-subnet-%s", var.network_prefix, each.key),
   }
 }
 
 # private subnets
 resource "aws_subnet" "private_subnets" {
-  count             = var.az_count
+  for_each          = local.private_subnet_az_map
   vpc_id            = aws_vpc.vpc.id
-  availability_zone = "${var.region}${var.az_list[count.index]}"
-  cidr_block        = var.private_subnet_cidrs[count.index]
+  availability_zone = "${var.region}${each.key}"
+  cidr_block        = each.value
 
   tags = {
-    Name = format("%s-private-subnet-az%d", var.network_prefix, count.index + 1),
+    Name = format("%s-private-subnet-%s", var.network_prefix, each.key),
   }
 }
 
 # elastic ip
 resource "aws_eip" "eip" {
-  count = length(aws_subnet.public_subnets[*].id)
+  for_each = aws_subnet.public_subnets # Iterate over the public subnets
 
   tags = {
-    Name = format("%s-eip", var.network_prefix)
+    Name = format("%s-eip-%s", var.network_prefix, each.key) # each.key here is the AZ identifier from public_subnets map
   }
 }
 
 # nat gateway
 resource "aws_nat_gateway" "nat_gateway" {
-  count         = length(aws_subnet.public_subnets[*].id)
-  subnet_id     = aws_subnet.public_subnets[count.index].id
-  allocation_id = aws_eip.eip[count.index].id
+  for_each      = aws_subnet.public_subnets # Iterate over the public subnets
+  subnet_id     = each.value.id             # each.value is the public subnet object
+  allocation_id = aws_eip.eip[each.key].id  # Reference EIP by the same AZ key
 
   tags = {
-    Name = format("%s-nat-gateway-%s", var.network_prefix, var.az_list[count.index])
+    Name = format("%s-nat-gateway-%s", var.network_prefix, each.key) # each.key is the AZ identifier
   }
 }
 
@@ -65,47 +72,47 @@ resource "aws_internet_gateway" "internet_gateway" {
 
 # private route
 resource "aws_route_table" "private_route_table" {
-  count  = length(aws_subnet.private_subnets[*].id)
-  vpc_id = aws_vpc.vpc.id
+  for_each = aws_subnet.private_subnets # Iterate over private subnets (keyed by AZ)
+  vpc_id   = aws_vpc.vpc.id
 
   tags = {
-    Name = format("%s-private-route-table", var.network_prefix)
+    Name = format("%s-private-route-table-%s", var.network_prefix, each.key)
   }
 }
 
 resource "aws_route" "private_internet" {
-  count                  = length(aws_subnet.private_subnets[*].id)
-  route_table_id         = aws_route_table.private_route_table[count.index].id
+  for_each               = aws_route_table.private_route_table # Iterate over AZ-keyed private route tables
+  route_table_id         = each.value.id
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.nat_gateway[count.index].id
+  nat_gateway_id         = aws_nat_gateway.nat_gateway[each.key].id # Match NAT GW by AZ key
 }
 
 resource "aws_route_table_association" "private_subnet_route_table_association" {
-  count          = length(aws_subnet.private_subnets[*].id)
-  subnet_id      = aws_subnet.private_subnets[count.index].id
-  route_table_id = aws_route_table.private_route_table[count.index].id
+  for_each       = aws_subnet.private_subnets # Iterate over AZ-keyed private subnets
+  subnet_id      = each.value.id
+  route_table_id = aws_route_table.private_route_table[each.key].id # Match RT by AZ key
 }
 
 
 # public route
 resource "aws_route_table" "public_route_table" {
-  count  = length(aws_subnet.public_subnets[*].id)
-  vpc_id = aws_vpc.vpc.id
+  for_each = aws_subnet.public_subnets # Iterate over public subnets (keyed by AZ)
+  vpc_id   = aws_vpc.vpc.id
 
   tags = {
-    Name = format("%s-public-route-table", var.network_prefix)
+    Name = format("%s-public-route-table-%s", var.network_prefix, each.key)
   }
 }
 
 resource "aws_route" "public_internet" {
-  count                  = length(aws_subnet.public_subnets[*].id)
-  route_table_id         = aws_route_table.public_route_table[count.index].id
+  for_each               = aws_route_table.public_route_table # Iterate over AZ-keyed public route tables
+  route_table_id         = each.value.id
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.internet_gateway.id
+  gateway_id             = aws_internet_gateway.internet_gateway.id # Single IGW
 }
 
 resource "aws_route_table_association" "public_subnet_route_table_association" {
-  count          = length(aws_subnet.public_subnets[*].id)
-  subnet_id      = aws_subnet.public_subnets[count.index].id
-  route_table_id = aws_route_table.public_route_table[count.index].id
+  for_each       = aws_subnet.public_subnets # Iterate over AZ-keyed public subnets
+  subnet_id      = each.value.id
+  route_table_id = aws_route_table.public_route_table[each.key].id # Match RT by AZ key
 }

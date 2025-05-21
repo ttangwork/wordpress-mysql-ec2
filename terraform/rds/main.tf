@@ -17,7 +17,7 @@ resource "aws_security_group" "rds_sg" {
     from_port   = var.ingress_from_port
     to_port     = var.ingress_to_port
     protocol    = var.protocol
-    cidr_blocks = [data.terraform_remote_state.vpc.outputs.vpc_cidr]
+    security_groups = [var.ec2_asg_security_group_id] # Changed from cidr_blocks
   }
 
   egress {
